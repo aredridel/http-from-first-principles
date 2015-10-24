@@ -68,6 +68,10 @@ module.exports = {
             //
             // If we forget to call next(), our stream will just never end
             // and things may hang.
+            //
+            // The second function is optional, used if we need to do anything at
+            // the end of the stream. We don't, since we just pipe any remainder
+            // on blindly to our caller.
 
             // For simplicity, we're going to _completely_ ignore that binary
             // data like images are a thing that could ever exist.
@@ -151,24 +155,6 @@ module.exports = {
             }
 
             next(); // Ready for next chunk.
-        }, function atEnd(next) {
-            // through2 takes 2 functions: forEachChunk and atEnd -- this is the second one,
-            // it gets called when the data incoming to through2 ends. Any clean-up or final
-            // actions we need to take before we stop getting called happen here.
-
-            // there's still a stream 'end' event that has to happen, after this stream will
-            // do no more. We don't want a race between our cleanup and the caller's last read
-            // or the end event. They may assume they got it all if end was emitted before this,
-            // but we had one more thing to do, so we have to tell through2 we're not just done,
-            // but done-done.
-            //
-            // If we had no atEnd, it would just send 'end' when we're done. But we had one thing
-            // pending.
-
-            // So if we had leftovers, let's put them in headers. This isn't correct, but
-            // vanishing data in a closure variable is no good either.
-            response.rawHeaders.push(partial);
-            next();
         })).pipe(response);
         // Whatever comes out of our header-splitting stream parser must be the
         // body. Because that's what we designed, right?
