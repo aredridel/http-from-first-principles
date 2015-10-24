@@ -57,11 +57,18 @@ module.exports = {
         var partial = '';
 
         c.pipe(through2(function divideHeadersFromBody(data, _, next) {
+            // So through2 takes two functions: the first gets called for each
+            // chunk of incoming data, in order. It won't give us the next one
+            // until we call next(), so we never have two chunks being processed
+            // at the same time.
+            //
+            // If we forget to call next(), our stream will just never end
+            // and things may hang.
 
             // For simplicity, we're going to _completely_ ignore that binary
             // data like images are a thing that could ever exist.
             data = data.toString();
-            //
+
             // Here we figure out if data is header, body, or some of each.
             // This function gets called for each chunk of data, and we
             // decide whether to pass it on (this.push(data)), keep it for ourselves,
@@ -78,6 +85,9 @@ module.exports = {
             }
 
             while (data) {
+                // We'll deal with data in bits, chopping some off each time until we deal
+                // with it all. A while loop is a nice simple way.
+
                 var m = /\r?\n/.exec(data);
                 // `\r` is "carriage return", and `\n` is "newline" -- Unix only cares about `\n`,
                 // but HTTP is an IETF protocol, and the standard line ending is actually DOS line
