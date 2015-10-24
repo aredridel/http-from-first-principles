@@ -32,7 +32,7 @@ tap.test('makes a simple GET request', function (t) {
             t.ok(res.rawHeaders, 'We get a rawHeaders array');
             t.ok(res.rawHeaders.length, "We got headers in the array");
             console.warn(res.rawHeaders); // Let's see our work!
-            // t.equal(data.toString(), 'Hello', 'Data is just the body'); Will fix this later.
+            t.equal(data.toString(), 'Hello', 'Data is just the body');
             t.end();
         }));
     });

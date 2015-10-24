@@ -77,18 +77,38 @@ module.exports = {
             // This function gets called for each chunk of data, and we
             // decide whether to pass it on (this.push(data)), keep it for ourselves,
             // or split it apart and pass some on (this.push(somepart))
-
-            if (inBody) {
-                // We just pass along the body as it's received. We only have to parse
-                // headers. If we flipped the `inBody` switch, it means we are now in
-                // short-circuit mode, just passing along this remainder.
-                this.push(data);
-
-                // Stop processing here and let the next chunk flow in.
-                return next();
-            }
+            //
+            // There are a lot of cases:
+            //
+            // - partial previous data = '', data = a partial header;
+            // - partial = partial header, data = partial header + more headers
+            // - partial = empty, data = headers + body
+            // - partial = partial header, data = partial header + more headers + body...
+            // - more combinations
+            //
+            // You get the idea. It's that maybe-partial-stuff that complicates.
+            //
+            // We keep ourselves from going crazy by breaking it down into the smallest pieces
+            // and only dealing with the first of each. That means that the remaining cases
+            // become versions of the simple cases. Woo parsing. Doubly so with streams where
+            // you have arbitrary chunk boundaries. Like TCP, which HTTP is built on top of.
 
             while (data) {
+                if (inBody) {
+                    // We just pass along the body as it's received. We only have to parse
+                    // headers. If we flipped the `inBody` switch, it means we are now in
+                    // short-circuit mode, just passing along this remainder.
+                    //
+                    // This is the only place stuff gets pushed on to our caller -- only
+                    // body is passed on. Headers are completely absorbed by us, processed
+                    // into an object, and returned as a property on response -- much more
+                    // useful so the caller doesn't have to do what we're doing in this module.
+                    this.push(data);
+
+                    // Stop processing here and let the next chunk flow in.
+                    return next();
+                }
+
                 // We'll deal with data in bits, chopping some off each time until we deal
                 // with it all. A while loop is a nice simple way.
 
@@ -100,8 +120,8 @@ module.exports = {
                 if (m) {
                     // If there's a \n, we found a header line -- from start to \n.
 
-                    // We take anything we'd stored and add it to our list of headers.
-                    response.rawHeaders.push(partial + m.input.slice(0, m.index));
+                    // We take anything we'd stored and add it to our bit to make a complete header.
+                    var potentialHeader = partial + m.input.slice(0, m.index);
 
                     // Since we used up any previous partial piece if there was one, we clear it.
                     partial = '';
@@ -110,6 +130,14 @@ module.exports = {
                     // This could end the while loop, if the end of this chunk is also the end of a header.
                     data = data.slice(m.index + m[0].length);
 
+                    if (potentialHeader) {
+                        response.rawHeaders.push(potentialHeader);
+                    } else {
+                        // At this point, data is the start of the body, and since we've flipped
+                        // this bit, the next spin of the while loop will do the right thing.
+                        inBody = true;
+
+                    }
                 } else {
                     // No \r?\n, so we must have partial data, and just save it for the next go round.
                     // Hypothetically, data could equal "ntent-Type: text/ht" here and partial could
@@ -122,11 +150,6 @@ module.exports = {
                 }
             }
 
-            // okay, so the question is we are never flipping the switch onBOdy so we will always hit this if else after headers are parsed which is what we don't wnat? :P
-            // Correct! Let's get header parsing work, then flip the bit when we find the end of headers. Hard to do in the opposite order, since they haven't arrived yet.
-
-
-            this.push(data) // Just pass it on. for now.
             next(); // Ready for next chunk.
         }, function atEnd(next) {
             // through2 takes 2 functions: forEachChunk and atEnd -- this is the second one,
