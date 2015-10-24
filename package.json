@@ -14,5 +14,13 @@
   "dependencies": {
     "bl": "^1.0.0",
     "through2": "^2.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aredridel/http-from-first-principles.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aredridel/http-from-first-principles/issues"
+  },
+  "homepage": "https://github.com/aredridel/http-from-first-principles#readme"
 }
