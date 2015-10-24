@@ -1,0 +1,14 @@
+{
+  "name": "http-from-first-principles",
+  "version": "1.0.0",
+  "description": "A simple HTTP client for learning concepts from",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap test.js"
+  },
+  "author": "Aria Stewart <aredridel@nbtsc.org>",
+  "license": "ISC",
+  "devDependencies": {
+    "tap": "^2.2.0"
+  }
+}
