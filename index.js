@@ -46,7 +46,8 @@ module.exports = {
         // Data goes in one side, comes out the other. One of the simplest streams.
         var response = new stream.PassThrough();
 
-        response.headers = {}; // Look! Fake headers!
+        response.headers = {};
+        // We will postprocess the headers later into this object.
 
         // A simple list of the raw header lines. We'll do more with them later,
         // but sometimes callers want to see the details.
@@ -141,6 +142,9 @@ module.exports = {
                         // this bit, the next spin of the while loop will do the right thing.
                         inBody = true;
 
+                        // We have a complete set of headers, so let's post-process them into the
+                        // more useful response.headers object.
+                        completeHeaders();
                     }
                 } else {
                     // No \r?\n, so we must have partial data, and just save it for the next go round.
@@ -160,5 +164,12 @@ module.exports = {
         // body. Because that's what we designed, right?
 
         return response; // Not a terrible interface. Headers in response.headers, body as the stream.
+
+        function completeHeaders() {
+            response.rawHeaders.forEach(function (header) {
+                var pair = header.split(/: ?/, 2);
+                response.headers[pair[0].toLowerCase()] = pair[1];
+            });
+        }
     }
 }

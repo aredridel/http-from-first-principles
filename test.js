@@ -31,7 +31,8 @@ tap.test('makes a simple GET request', function (t) {
             t.ok(res.headers, 'We get a headers object');
             t.ok(res.rawHeaders, 'We get a rawHeaders array');
             t.ok(res.rawHeaders.length, "We got headers in the array");
-            console.warn(res.rawHeaders); // Let's see our work!
+
+            t.equal(res.headers['content-length'], "5", "Got a parsed content-length header");
             t.equal(data.toString(), 'Hello', 'Data is just the body');
             t.end();
         }));
