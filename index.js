@@ -1,3 +1,7 @@
+"use strict";
+// Because Aria can't remember what variable names she's used.
+// This makes global assignment an error at least.
+
 var net = require('net');
 // Because we're building HTTP on top of raw TCP
 
