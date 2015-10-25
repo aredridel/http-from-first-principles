@@ -15,6 +15,10 @@ incrementally with data as it comes over the wire. The test suite ain't bad
 either, and shows off some tricks for using a real live http server for testing
 on an ephemeral port.
 
+The design is meant to have things in common with node's http library -- that
+one uses a C++ module for parsing the HTTP headers, rather than the naive
+approach I took here, but the structure is a bit similar.
+
 If this project is useful to you, say hi! I'd love to hear from you.
 
 Aria Stewart <aredridel@dinhe.net>
