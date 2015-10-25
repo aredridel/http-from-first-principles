@@ -28,7 +28,8 @@ tap.test('makes a simple GET request', function (t) {
         var res = client.request("http://localhost:" + server.address().port + "/", 'GET');
         res.pipe(bl(function (err, data) {
             t.error(err);
-            t.ok(data);
+            t.ok(res.headers, 'We get a headers object');
+            t.match(data.toString(), /Hello/);
             t.end();
         }));
     });
