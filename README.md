@@ -19,6 +19,10 @@ The design is meant to have things in common with node's http library -- that
 one uses a C++ module for parsing the HTTP headers, rather than the naive
 approach I took here, but the structure is a bit similar.
 
+There's some [background on the development process] on my blog.
+
 If this project is useful to you, say hi! I'd love to hear from you.
 
 Aria Stewart <aredridel@dinhe.net>
+
+[background on the development process]: http://aredridel.dinhe.net/2015/10/25/learning-how-to-speak-network-protocols-in-node-js-by-implementing-http/
