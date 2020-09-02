@@ -12,7 +12,7 @@
     "tap": "^2.2.0"
   },
   "dependencies": {
-    "bl": "^1.0.0",
+    "bl": "^4.0.3",
     "through2": "^2.0.0"
   },
   "repository": {
